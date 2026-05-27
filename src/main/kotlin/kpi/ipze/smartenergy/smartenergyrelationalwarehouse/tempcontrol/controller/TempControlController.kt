@@ -35,14 +35,6 @@ class TempControlController(
         return SaveTempControlSensorRecordResponse(saved.toDto())
     }
 
-    private fun TempControlSensorRecordEntity.toDto(): TempControlSensorRecordDto = TempControlSensorRecordDto(
-        id = requireNotNull(id) { "Saved record id is null" },
-        sensorId = sensorId,
-        parameter = parameter,
-        value = value,
-        timestamp = timestamp
-    )
-
     @GetMapping("/latest")
     fun findLatestBySensorId(@RequestParam sensorId: Int): TempControlSensorRecordDto {
         val record = repository.findLatestBySensorId(sensorId)
@@ -56,4 +48,12 @@ class TempControlController(
         @RequestParam("before") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) before: Instant
     ): List<TempControlSensorRecordDto> =
         repository.findAfterAndBeforeTimestamps(after, before).map { it.toDto() }
+
+    private fun TempControlSensorRecordEntity.toDto(): TempControlSensorRecordDto = TempControlSensorRecordDto(
+        id = requireNotNull(id) { "Saved record id is null" },
+        sensorId = sensorId,
+        parameter = parameter,
+        value = value,
+        timestamp = timestamp
+    )
 }
