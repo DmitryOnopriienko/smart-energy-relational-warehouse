@@ -1,4 +1,6 @@
 FROM amazoncorretto:21 AS builder
+# The Gradle wrapper script needs xargs, which the minimal Amazon Linux base image lacks
+RUN dnf install -y findutils && dnf clean all
 WORKDIR /app
 
 COPY gradlew gradlew.bat build.gradle.kts settings.gradle.kts ./

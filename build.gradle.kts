@@ -24,9 +24,13 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    implementation("org.springframework.boot:spring-boot-starter-flyway")
+    implementation("org.flywaydb:flyway-database-postgresql")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2")
     implementation("tools.jackson.module:jackson-module-kotlin")
+    // Jackson 2 Kotlin module: swagger-core still uses Jackson 2 and needs it to mark non-null properties as required
+    runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     developmentOnly("org.springframework.boot:spring-boot-docker-compose")
     runtimeOnly("org.postgresql:postgresql")
@@ -50,4 +54,20 @@ allOpen {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+val openApiOutputDir = layout.buildDirectory.dir("openapi")
+
+tasks.test {
+    systemProperty("openapi.output.dir", openApiOutputDir.get().asFile.absolutePath)
+}
+
+tasks.register<Test>("generateOpenApiSpec") {
+    description = "Generates the OpenAPI spec (openapi.json/openapi.yaml) into build/openapi without a database."
+    group = "documentation"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    filter { includeTestsMatching("*.OpenApiSpecGenerationTest") }
+    systemProperty("openapi.output.dir", openApiOutputDir.get().asFile.absolutePath)
+    outputs.dir(openApiOutputDir)
 }

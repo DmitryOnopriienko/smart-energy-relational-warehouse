@@ -25,9 +25,23 @@
 ## Запуск
 1. Встановіть Docker та Docker Compose.
 2. Клонувати репозиторій та перейти до папки з проектом.
-3. Запустіть команду `docker-compose up` для запуску контейнерів з PostgreSQL.
-4. Зберіть зображення додатку та запустіть його, використовуючи Docker, або стягніть його з Docker Hub, якщо воно там доступне.
-5. Додаток буде доступний на `http://localhost:8080`.
+3. Запустіть додаток одним із способів:
+   - **Повністю в Docker:** `docker compose --profile app up --build` — збирає образ додатку та запускає його разом з PostgreSQL.
+   - **З IDE / `./gradlew bootRun`:** PostgreSQL запуститься автоматично (Spring Boot Docker Compose support), або вручну командою `docker compose up` (лише БД).
+4. Додаток буде доступний на `http://localhost:8080`.
+
+## Документація API
+Специфікація OpenAPI генерується автоматично з коду (springdoc-openapi та анотації Swagger у контролерах і DTO).
+- Swagger UI запущеного додатку: `http://localhost:8080/swagger-ui.html`
+- Специфікація: `http://localhost:8080/v3/api-docs` (JSON) та `http://localhost:8080/v3/api-docs.yaml` (YAML)
+- Згенерувати файли специфікації без запуску додатку та БД: `./gradlew generateOpenApiSpec` — результат у `build/openapi/openapi.json` та `build/openapi/openapi.yaml`.
+
+## Міграції бази даних
+Схема БД керується за допомогою [Flyway](https://documentation.red-gate.com/flyway). Міграції застосовуються автоматично під час запуску додатку.
+- Файли міграцій знаходяться в `src/main/resources/db/migration`.
+- Назва файлу: `V<версія>__<опис>.sql`, наприклад `V2__add_humidity_parameter.sql`.
+- Вже застосовані міграції **не можна змінювати** — для будь-яких змін схеми створюйте нову міграцію з наступним номером версії.
+- Hibernate не змінює схему, а лише перевіряє її відповідність сутностям (`ddl-auto: validate`), тому кожна зміна сутностей має супроводжуватися відповідною міграцією.
 
 ## Тестування
 На даний момент основними методами тестування є використання Postman для відправки HTTP-запитів до API.
